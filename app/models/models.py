@@ -32,3 +32,19 @@ class Task(Base):
     due_date = Column(Date, nullable=True)
     creator_id = Column(Integer, ForeignKey("user.id"), index=True)
 
+class TaskAssigment(Base):
+    __tablename__="task_assigment"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    assigned_at = Column(DateTime, nullable=False, default=func.now())
+    task_id = Column(Integer, ForeignKey("task.id"), index=True)
+    user_id = Column(Integer, ForeignKey("user.id"), index=True)
+
+class Notification(Base):
+    __tablename__="notification"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    message = Column(Text, nullable=False)
+    is_read = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime, nullable=False, default=func.now())
+    user_id = Column(Integer, ForeignKey("user.id"), index=True)
