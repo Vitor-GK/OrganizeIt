@@ -12,7 +12,7 @@ class User(Base):
     email = Column(String(100), nullable=False, unique=True)
     birth_date = Column(Date, nullable=False)
     password = Column(String(100), nullable=False)
-    role = Column(Enum(RoleEnum, name="role_enum"), nullable=False)
+    role = Column(Enum(RoleEnum, name="role_enum", native_enum=False), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, nullable=False, default=func.now())
     updated_at = Column(DateTime, nullable=True, onupdate=func.now())
