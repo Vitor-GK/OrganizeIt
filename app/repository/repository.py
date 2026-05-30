@@ -22,3 +22,7 @@ class Repository:
         self.db.commit()
         self.db.refresh(new_user)
         return new_user
+    
+    def get_user_by_id(self, user_id: int):
+        user = self.db.query(User).filter(User.id == user_id).first()
+        return user
