@@ -14,7 +14,7 @@ class Service:
             raise HTTPException(status_code=409, detail="Email already registered")
         return self.repo.register_user(user_register)
     
-    def get_user(self, user_id: int, current_user: User):
+    def get_user_by_id(self, user_id: int, current_user: User):
         if current_user.role !=  RoleEnum.ADMIN:
             raise HTTPException(status_code=403, detail="Acess denied, you do not have authorization acesses this function")
         

@@ -40,3 +40,16 @@ def test_get_email_not_exists(db):
     repo = Repository(db)
     result = repo.get_email("naoexiste@test.com")
     assert result is None
+
+def test_get_user_by_id_sucess(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    result = repo.get_user_by_id(1)
+
+    assert result is not None
+
+def test_get_user_by_id_not_exist(db):
+    repo = Repository(db)
+    result = repo.get_user_by_id(999)
+    
+    assert result is None

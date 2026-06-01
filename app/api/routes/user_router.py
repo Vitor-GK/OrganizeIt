@@ -19,4 +19,4 @@ async def register_user(user_register: UserRegister, db: Session = Depends(get_d
 async def get_user_by_id(user_id: int, current_user: User, db: Session = Depends(get_db)):
     repo = Repository(db)
     service = Service(repo)
-    return service.get_user(user_id, current_user)
+    return service.get_user_by_id(user_id, current_user)
