@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from schemas.user import UserRegister, UserResponse
+from schemas.user import UserRegister, UserResponse, UserUpdate
 from service.service import Service
 from repository.repository import Repository
 from models.models import User
@@ -20,3 +20,9 @@ async def get_user_by_id(user_id: int, current_user: User, db: Session = Depends
     repo = Repository(db)
     service = Service(repo)
     return service.get_user_by_id(user_id, current_user)
+
+@user_router.put("/id")
+async def update_user(user_id: int, user_update: UserUpdate, current_user: User, db: Session = Depends(get_db)):
+    repo = Repository(db)
+    service = Service(repo)
+    return service.update_user(user_id, user_update, current_user)
