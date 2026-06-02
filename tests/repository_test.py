@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.models import Base, User
 from repository.repository import Repository
-from schemas.user import UserRegister
+from schemas.user import UserRegister, UserUpdate
 from datetime import date
 
 engine = create_engine("sqlite:///:memory:")
@@ -53,3 +53,24 @@ def test_get_user_by_id_not_exist(db):
     result = repo.get_user_by_id(999)
     
     assert result is None
+
+def test_update_user(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    user_update = UserUpdate(full_name="New Name")
+    result = repo.update_user(1, user_update)
+    assert result.full_name == "New Name"
+
+def test_update_user_email(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    user_update = UserUpdate(email="new@test.com")
+    result = repo.update_user(1, user_update)
+    assert result.email == "new@test.com"
+
+def test_update_user_partial(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    user_update = UserUpdate(full_name="New Name")
+    result = repo.update_user(1, user_update)
+    assert result.email == "test@test.com"

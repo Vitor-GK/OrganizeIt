@@ -29,7 +29,7 @@ class Repository:
         return new_user
     
     def update_user(self, user_id: int, user_update: UserUpdate):
-        user  = self.db.query(User).filter(User.id  == user_id)
+        user  = self.db.query(User).filter(User.id  == user_id).first()
 
         if user_update.full_name:
             user.full_name = user_update.full_name
