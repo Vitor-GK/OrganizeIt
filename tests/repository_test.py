@@ -74,3 +74,14 @@ def test_update_user_partial(db):
     user_update = UserUpdate(full_name="New Name")
     result = repo.update_user(1, user_update)
     assert result.email == "test@test.com"
+
+def test_delete_user(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    result = repo.delete_user(1)
+    assert result.is_active == False
+
+def test_delete_user_not_found(db):
+    repo = Repository(db)
+    result = repo.delete_user(999)
+    assert result is None
