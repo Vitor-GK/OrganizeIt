@@ -43,3 +43,11 @@ class Repository:
         self.db.commit()
         self.db.refresh(user)
         return user
+    
+    def delete_user(self, user_id: int):
+        user  = self.db.query(User).filter(User.id  == user_id).first()
+        user.is_active = 0
+
+        self.db.commit()
+        self.db.refresh(user)
+        return user

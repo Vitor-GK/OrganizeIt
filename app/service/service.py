@@ -24,7 +24,7 @@ class Service:
         
         return user
     
-    def user_update(self, user_id: int, user_update: UserUpdate, current_user: User):
+    def update_user(self, user_id: int, user_update: UserUpdate, current_user: User):
         user = self.repo.get_user_by_id(user_id)
 
         if not user:
@@ -39,3 +39,17 @@ class Service:
                 raise HTTPException(status_code=409, detail="This email is already registered")
             
         return self.repo.update_user(user_id, user_update)
+    
+    def delete_user(self, user_id: int, current_user: User):
+        user = self.repo.get_user_by_id(user_id)
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User id not found")
+        
+        if current_user.id != user_id and current_user.role != RoleEnum.ADMIN:
+            raise HTTPException(status_code=403, detail="Acess denied, you do not have authorization acesses this function")
+        
+        if user.is_active == 0:
+            raise HTTPException(status_code=400, detail="This user is already inactive")
+        
+        return self.repo.delete_user(user_id)

@@ -21,8 +21,14 @@ async def get_user_by_id(user_id: int, current_user: User, db: Session = Depends
     service = Service(repo)
     return service.get_user_by_id(user_id, current_user)
 
-@user_router.put("/id")
+@user_router.put("/{id}")
 async def update_user(user_id: int, user_update: UserUpdate, current_user: User, db: Session = Depends(get_db)):
     repo = Repository(db)
     service = Service(repo)
     return service.update_user(user_id, user_update, current_user)
+
+@user_router.delete("/{id}")
+async def delete_user(user_id: int, current_user: User, db: Session = Depends(get_db)):
+    repo = Repository(db)
+    service = Service(repo)
+    return service.delete_user(user_id, current_user)
