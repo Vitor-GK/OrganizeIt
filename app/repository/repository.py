@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
 from pydantic import EmailStr
-from models.models import User
+from models.models import User, Task, TaskAssigment
 from schemas.user import UserRegister
-from enums import RoleEnum
+from enums import RoleEnum, TaskEnum
 from schemas.user import UserUpdate
+from schemas.task import TaskCreater
 
 class Repository:
     def __init__(self, db: Session):
@@ -53,3 +54,20 @@ class Repository:
         self.db.commit()
         self.db.refresh(user)
         return user
+    
+    def create_task(self, task_creater: TaskCreater, user_id: int):
+        new_task = Task(name=task_creater.name, description=task_creater.description, status=TaskEnum.PENDING, priority=task_creater.priority, due_date=task_creater.due_date, creator_id=user_id)
+        self.db.add(new_task)
+        self.db.commit()
+        self.db.refresh(new_task)
+
+        return new_task
+
+    def get_task_by_id(self, task_id: int):
+        task = self.db.query(Task).filter(Task.id == task_id).first()
+        return task
+    
+    def get_assigned_tasks(self, user_id: int):
+        tasks = self.db.query(Task).join(TaskAssigment, TaskAssigment.task_id == Task.id).filter(TaskAssigment.user_id == user_id).all()
+
+        return tasks

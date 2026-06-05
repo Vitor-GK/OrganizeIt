@@ -1,6 +1,6 @@
 from enum import Enum
 
-class TaksEnum(str, Enum):
+class TaskEnum(str, Enum):
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETE = "complete"
