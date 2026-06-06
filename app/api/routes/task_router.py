@@ -21,7 +21,7 @@ async def get_task_by_id(task_id: int, db: Session = Depends(get_db)):
     repo =  Repository(db)
     service = Service(repo)
     return service.get_task_by_id(task_id)
-
+ 
 @task_router.get("/assigned/To{id}", response_model=List[TaskResponse])
 async def get_assigned_tasks(user_id: int, db: Session = Depends(get_db)):
     repo =  Repository(db)
