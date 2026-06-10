@@ -1,6 +1,6 @@
 from repository.repository import Repository
 from schemas.user import UserRegister, UserUpdate
-from schemas.task import TaskCreater
+from schemas.task import TaskCreater, TaskUpdate
 from fastapi import HTTPException
 from models.models import User
 from enums import RoleEnum
@@ -17,7 +17,7 @@ class Service:
     
     def get_user_by_id(self, user_id: int, current_user: User):
         if current_user.role !=  RoleEnum.ADMIN:
-            raise HTTPException(status_code=403, detail="Acess denied, you do not have authorization to acess this function")
+            raise HTTPException(status_code=403, detail="Access denied, you do not have authorization to acess this function")
         
         user = self.repo.get_user_by_id(user_id)
         if not user:
@@ -32,7 +32,7 @@ class Service:
             raise HTTPException(status_code=404, detail="User id not found")
         
         if current_user.id != user_id and current_user.role != RoleEnum.ADMIN:
-            raise HTTPException(status_code=403, detail="Acess denied, you do not have authorization to acess this function")
+            raise HTTPException(status_code=403, detail="Access denied, you do not have authorization to acess this function")
         
         if user_update.email:
             email = self.repo.get_email(user_update.email)
@@ -48,7 +48,7 @@ class Service:
             raise HTTPException(status_code=404, detail="User id not found")
         
         if current_user.id != user_id and current_user.role != RoleEnum.ADMIN:
-            raise HTTPException(status_code=403, detail="Acess denied, you do not have authorization to acess this function")
+            raise HTTPException(status_code=403, detail="Access denied, you do not have authorization to acess this function")
         
         if user.is_active == 0:
             raise HTTPException(status_code=400, detail="This user is already inactive")
@@ -59,7 +59,7 @@ class Service:
         user = self.repo.get_user_by_id(current_user.id)
 
         if user.role != RoleEnum.ADMIN:
-            raise HTTPException(status_code=403, detail="Acess denied, you do not have authorization to acess this function")
+            raise HTTPException(status_code=403, detail="Access denied, you do not have authorization to acess this function")
         
         return self.repo.create_task(task_creater, current_user.id)
     
@@ -78,3 +78,15 @@ class Service:
             raise HTTPException(status_code=404, detail="User not found")
         
         return self.repo.get_assigned_tasks(user_id)
+    
+    def update_task(self, task_id: int, task_update: TaskUpdate, current_user: User):
+        task = self.get_task_by_id(task_id)
+
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+        
+        if current_user.role != RoleEnum.ADMIN:
+            raise HTTPException(status_code=403, detail="Access denied, you do not have authorization to acess this function")
+        
+        return self.repo.update_task(task_id, task_update)
+        

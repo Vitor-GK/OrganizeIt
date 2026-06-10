@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from schemas.task import TaskCreater, TaskResponse
+from schemas.task import TaskCreater, TaskResponse, TaskUpdate
 from service.service import Service
 from repository.repository import Repository
 from models.models import User
@@ -27,4 +27,9 @@ async def get_assigned_tasks(user_id: int, db: Session = Depends(get_db)):
     repo =  Repository(db)
     service = Service(repo)
     return service.get_assigned_tasks(user_id)
-    
+
+@task_router.put("/{id}")
+async def update_task(task_id: int, task_update: TaskUpdate, current_user: User, db: Session = Depends(get_db)):
+    repo =  Repository(db)
+    service = Service(repo)
+    return service.update_task(task_id, task_update, current_user)

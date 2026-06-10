@@ -16,3 +16,8 @@ class TaskResponse(BaseModel):
     description: str
     priority: TaskEnum | None = None
     due_date: date | None = None
+
+class TaskUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    status: TaskEnum

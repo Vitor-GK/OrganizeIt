@@ -4,7 +4,7 @@ from models.models import User, Task, TaskAssigment
 from schemas.user import UserRegister
 from enums import RoleEnum, TaskEnum
 from schemas.user import UserUpdate
-from schemas.task import TaskCreater
+from schemas.task import TaskCreater, TaskUpdate
 
 class Repository:
     def __init__(self, db: Session):
@@ -46,7 +46,7 @@ class Repository:
         return user
     
     def delete_user(self, user_id: int):
-        user  = self.db.query(User).filter(User.id  == user_id).first()
+        user  = self,self.get_user_by_id(user_id)
         if not user:
             return None
         user.is_active = 0
@@ -71,3 +71,17 @@ class Repository:
         tasks = self.db.query(Task).join(TaskAssigment, TaskAssigment.task_id == Task.id).filter(TaskAssigment.user_id == user_id).all()
 
         return tasks
+    
+    def update_task(self, task_id: int, task_update: TaskUpdate):
+        task = self.get_task_by_id(task_id)
+
+        if task_update.name != None:
+            task.name = task_update.name
+        if task_update.description != None:
+            task.description = task_update.description
+        if task_update.status != None:
+            task.status = task_update.status
+
+        self.db.commit()
+        self.db.refresh(task)
+        return task
