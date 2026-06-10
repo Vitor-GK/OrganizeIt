@@ -89,4 +89,14 @@ class Service:
             raise HTTPException(status_code=403, detail="Access denied, you do not have authorization to acess this function")
         
         return self.repo.update_task(task_id, task_update)
+    
+    def delete_task(self, task_id: int, current_user: User):
+        task = self.get_task_by_id(task_id)
+
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
         
+        if current_user.role != RoleEnum.ADMIN:
+            raise HTTPException(status_code=403, detail="Access denied, you do not have authorization to acess this function")
+        
+        return self.repo.delete_task(task_id)

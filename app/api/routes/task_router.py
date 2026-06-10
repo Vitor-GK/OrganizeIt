@@ -33,3 +33,9 @@ async def update_task(task_id: int, task_update: TaskUpdate, current_user: User,
     repo =  Repository(db)
     service = Service(repo)
     return service.update_task(task_id, task_update, current_user)
+
+@task_router.delete("/{id}")
+async def delete_task(task_id: int, current_user: User, db: Session = Depends(get_db)):
+    repo =  Repository(db)
+    service = Service(repo)
+    return service.delete_task(task_id, current_user)

@@ -14,8 +14,7 @@ class Repository:
         return self.db.query(User).filter(User.email == email).first()
     
     def get_user_by_id(self, user_id: int):
-        user = self.db.query(User).filter(User.id == user_id).first()
-        return user
+        return self.db.query(User).filter(User.id == user_id).first()
 
     def register_user(self, user_register: UserRegister):
         new_user = User(full_name=user_register.full_name,
@@ -64,13 +63,10 @@ class Repository:
         return new_task
 
     def get_task_by_id(self, task_id: int):
-        task = self.db.query(Task).filter(Task.id == task_id).first()
-        return task
+        return self.db.query(Task).filter(Task.id == task_id).first()
     
     def get_assigned_tasks(self, user_id: int):
-        tasks = self.db.query(Task).join(TaskAssigment, TaskAssigment.task_id == Task.id).filter(TaskAssigment.user_id == user_id).all()
-
-        return tasks
+        return self.db.query(Task).join(TaskAssigment, TaskAssigment.task_id == Task.id).filter(TaskAssigment.user_id == user_id).all()
     
     def update_task(self, task_id: int, task_update: TaskUpdate):
         task = self.get_task_by_id(task_id)
@@ -82,6 +78,14 @@ class Repository:
         if task_update.status != None:
             task.status = task_update.status
 
+        self.db.commit()
+        self.db.refresh(task)
+        return task
+    
+    def delete_task(self, task_id):
+        task = self.get_task_by_id(task_id)
+
+        self.db.delete(task)
         self.db.commit()
         self.db.refresh(task)
         return task
