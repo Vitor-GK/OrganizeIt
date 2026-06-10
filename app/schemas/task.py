@@ -1,11 +1,11 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import date
-from enums import TaksEnum
+from enums import TaskEnum
 
 class TaskCreater(BaseModel):
     name: str
     description: str
-    priority: TaksEnum | None = None
+    priority: TaskEnum | None = None
     due_date: date | None = None
 
 class TaskResponse(BaseModel):
@@ -14,5 +14,5 @@ class TaskResponse(BaseModel):
     id: int
     name: str
     description: str
-    priority: TaksEnum | None = None
+    priority: TaskEnum | None = None
     due_date: date | None = None

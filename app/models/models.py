@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Date, DateTime, Enum, Numeric, Boolean, Text
 from sqlalchemy.sql import func
-from app.enums import TaksEnum, PriorityEnum, RoleEnum
+from app.enums import TaskEnum, PriorityEnum, RoleEnum
 
 from app.core.db import Base
 
@@ -27,7 +27,7 @@ class Task(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
     description = Column(Text, nullable=False)
-    status = Column(Enum(TaksEnum, name="task_enum"), nullable=False)
+    status = Column(Enum(TaskEnum, name="task_enum"), nullable=False)
     priority = Column(Enum(PriorityEnum, name="priority_enum"), nullable=True)
     due_date = Column(Date, nullable=True)
     creator_id = Column(Integer, ForeignKey("user.id"), index=True)

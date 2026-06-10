@@ -10,7 +10,7 @@ from api.deps import get_db
 
 task_router = APIRouter(prefix="/task", tags=["task"])
 
-@task_router.post("/task")
+@task_router.post("/")
 async def create_task(task_creater: TaskCreater, current_user: User, db: Session = Depends(get_db)):
     repo =  Repository(db)
     service = Service(repo)
