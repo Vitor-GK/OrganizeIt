@@ -45,7 +45,7 @@ class Repository:
         return user
     
     def delete_user(self, user_id: int):
-        user  = self,self.get_user_by_id(user_id)
+        user  = self.get_user_by_id(user_id)
         if not user:
             return None
         user.is_active = 0

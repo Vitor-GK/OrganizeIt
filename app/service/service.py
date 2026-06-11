@@ -4,6 +4,9 @@ from schemas.task import TaskCreater, TaskUpdate
 from fastapi import HTTPException
 from models.models import User
 from enums import RoleEnum
+from core.security import verify_password, create_access_token
+from schemas.auth import LoginRequest
+
 
 class Service:
     def __init__(self, repo: Repository):
@@ -100,3 +103,15 @@ class Service:
             raise HTTPException(status_code=403, detail="Access denied, you do not have authorization to acess this function")
         
         return self.repo.delete_task(task_id)
+    
+    def login(self, login_request: LoginRequest):
+        user = self.repo.get_email(login_request.email)
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        if not verify_password(login_request.password, user.password):
+            raise HTTPException(status_code=401, detail="Invalid password")
+        
+        token = create_access_token({"sub": str(user.id)})
+        return {"access_token": token, "token_type": "bearer"}
