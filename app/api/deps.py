@@ -1,10 +1,12 @@
-from app.core.db import SessionLocal
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from fastapi import Depends
+from sqlalchemy.exc import SQLAlchemyError
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
-from app.core.exceptions import ServiceError, InvalidCredentials, NotFound
+from core.db import SessionLocal
+from core.security import decode_access_token
+from repository.repository import Repository
+
 
 
 from app.core.security import decode_access_token
@@ -14,9 +16,9 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         db.rollback()
-        raise ServiceError(detail="Error in the database service.")
+        raise HTTPException(status_code=500, detail="Error in the database service.")
     finally:
         db.close()
 
@@ -25,12 +27,13 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
         payload = decode_access_token(token)
-        member_id = int(payload.get("sub"))
+        user_id = int(payload.get("sub"))
     except JWTError:
-        raise InvalidCredentials(detail="Invalid token.")
+        raise HTTPException(status_code=401, detail="Invalid token")
     
-    member = db.query(Member).filter(Member.id == member_id).first()
-    if not member:
-        raise NotFound(detail="User was not found in database.")
+    repo = Repository(db)
+    user = repo.get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     
-    return member
+    return user

@@ -59,9 +59,7 @@ class Service:
         return self.repo.delete_user(user_id)
     
     def create_task(self, task_creater: TaskCreater, current_user: User):
-        user = self.repo.get_user_by_id(current_user.id)
-
-        if user.role != RoleEnum.ADMIN:
+        if current_user.role != RoleEnum.ADMIN:
             raise HTTPException(status_code=403, detail="Access denied, you do not have authorization to acess this function")
         
         return self.repo.create_task(task_creater, current_user.id)
