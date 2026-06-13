@@ -87,5 +87,4 @@ class Repository:
 
         self.db.delete(task)
         self.db.commit()
-        self.db.refresh(task)
         return task
