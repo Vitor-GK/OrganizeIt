@@ -6,7 +6,7 @@ from datetime import date
 from fastapi import HTTPException
 from models.models import User
 from enums import TaskEnum, PriorityEnum, RoleEnum
-
+from unittest.mock import patch
 
 class FakeUser:
     def __init__(self, id, full_name, email, is_active=1, role=None):
@@ -105,7 +105,20 @@ class FakeRepository:
             status = task.status if hasattr(task, 'status') else 'pending'
             result[status] = result.get(status, 0) + 1
         return result
+    
+    def logout(self, user_id: int, token: str):
+        for user in self.users:
+            if user.id == user_id:
+                user.banned_token = token
+                return {"message": "Logged out successfully"}
+        return None
         
+    def assign_task(self, task_id: int, user_id: int):
+        assignment = {"task_id": task_id, "user_id": user_id}
+        return assignment
+
+    def get_assigned_users(self, task_id: int):
+        return [user for user in self.users if any(task.id == task_id for task in self.tasks)]
     
 def make_user_register(email="test@test.com"):
     return UserRegister(
@@ -347,3 +360,58 @@ def test_get_tasks_by_user_with_id_success():
 
     result = service.get_tasks_by_user(1)
     assert isinstance(result, list)
+
+def test_logout_success():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    current_user = make_fake_user(RoleEnum.ADMIN)
+    current_user.id = 1
+
+    result = service.logout(current_user, "fake_token")
+    assert result == {"message": "Logged out successfully"}
+
+def test_assign_task_access_denied():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    current_user = make_fake_user(RoleEnum.GUEST)
+    current_user.id = 1
+
+    with pytest.raises(HTTPException) as exc:
+        service.assign_task(1, 1, current_user)
+    assert exc.value.status_code == 403
+
+def test_assign_task_not_found():
+    repo = FakeRepository()
+    service = Service(repo)
+    current_user = make_fake_user(RoleEnum.ADMIN)
+    current_user.id = 1
+
+    with pytest.raises(HTTPException) as exc:
+        service.assign_task(999, 1, current_user)
+    assert exc.value.status_code == 404
+
+def test_assign_task_user_not_found():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    current_user = make_fake_user(RoleEnum.ADMIN)
+    current_user.id = 1
+    service.create_task(make_task_creater(), current_user)
+
+    with pytest.raises(HTTPException) as exc:
+        service.assign_task(1, 999, current_user)
+    assert exc.value.status_code == 404
+
+def test_assign_task_success():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    current_user = make_fake_user(RoleEnum.ADMIN)
+    current_user.id = 1
+    service.create_task(make_task_creater(), current_user)
+
+    with patch("service.service.send_task_notification"):
+        result = service.assign_task(1, 1, current_user)
+    assert result is not None

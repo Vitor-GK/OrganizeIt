@@ -6,6 +6,7 @@ from models.models import User
 from enums import RoleEnum
 from core.security import verify_password, create_access_token
 from schemas.auth import LoginRequest
+from service.email_service import send_task_notification
 
 
 class Service:
@@ -87,9 +88,15 @@ class Service:
             raise HTTPException(status_code=404, detail="Task not found")
         
         if current_user.role != RoleEnum.ADMIN:
-            raise HTTPException(status_code=403, detail="Access denied, you do not have authorization to acess this function")
+            raise HTTPException(status_code=403, detail="Access denied")
         
-        return self.repo.update_task(task_id, task_update)
+        updated_task = self.repo.update_task(task_id, task_update)
+        
+        assigned_users = self.repo.get_assigned_users(task_id)
+        for user in assigned_users:
+            send_task_notification(user.email, updated_task.name, "updated")
+        
+        return updated_task
     
     def delete_task(self, task_id: int, current_user: User):
         task = self.get_task_by_id(task_id)
@@ -122,3 +129,20 @@ class Service:
     
     def logout(self, current_user: User, token: str):
         return self.repo.logout(current_user.id, token)
+    
+    def assign_task(self, task_id: int, user_id: int, current_user: User):
+        if current_user.role != RoleEnum.ADMIN:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        task = self.repo.get_task_by_id(task_id)
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+        
+        user = self.repo.get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        assignment = self.repo.assign_task(task_id, user_id)
+        send_task_notification(user.email, task.name, "assigned")
+        
+        return assignment

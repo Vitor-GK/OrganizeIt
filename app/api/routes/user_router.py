@@ -7,9 +7,9 @@ from models.models import User
 
 from api.deps import get_db, get_current_user
 
-user_router = APIRouter(prefix="/user", tags=["user"])
+user_router = APIRouter(prefix="/users", tags=["users"])
 
-@user_router.post("/register")
+@user_router.post("/")
 async def register_user(user_register: UserRegister, db: Session = Depends(get_db)):
     repo = Repository(db)
     service = Service(repo)

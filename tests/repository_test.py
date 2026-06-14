@@ -144,3 +144,24 @@ def test_get_tasks_by_user_with_id(db):
     repo.create_task(make_task_creater(), 1)
     result = repo.get_tasks_by_user(1)
     assert isinstance(result, list)
+
+def test_logout(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    result = repo.logout(1, "fake_token")
+    assert result == {"message": "Logged out successfully"}
+
+def test_assign_task(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    repo.create_task(make_task_creater(), 1)
+    result = repo.assign_task(1, 1)
+    assert result is not None
+
+def test_get_assigned_users(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    repo.create_task(make_task_creater(), 1)
+    repo.assign_task(1, 1)
+    result = repo.get_assigned_users(1)
+    assert isinstance(result, list)

@@ -114,3 +114,16 @@ class Repository:
         self.db.commit()
         self.db.refresh(user)
         return {"message": "Logged out successfully"}
+
+    def assign_task(self, task_id: int, user_id: int):
+        assignment = TaskAssigment(task_id=task_id, user_id=user_id)
+        self.db.add(assignment)
+        self.db.commit()
+        self.db.refresh(assignment)
+        return assignment
+    
+    def get_assigned_users(self, task_id: int):
+        return self.db.query(User)\
+            .join(TaskAssigment, TaskAssigment.user_id == User.id)\
+            .filter(TaskAssigment.task_id == task_id)\
+            .all()
