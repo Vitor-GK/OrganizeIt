@@ -20,4 +20,4 @@ class TaskResponse(BaseModel):
 class TaskUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
-    status: TaskEnum
+    status: TaskEnum | None = None

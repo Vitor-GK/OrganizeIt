@@ -16,9 +16,7 @@ class User(Base):
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, nullable=False, default=func.now())
     updated_at = Column(DateTime, nullable=True, onupdate=func.now())
-    verification_token = Column(String(100), nullable=True, unique=True)
-    token_expires_at = Column(DateTime, nullable=True)
-    verified = Column(Boolean, nullable=False, default=False)
+    banned_token = Column(String(500), nullable=True)
 
 
 class Task(Base):
@@ -38,13 +36,4 @@ class TaskAssigment(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     assigned_at = Column(DateTime, nullable=False, default=func.now())
     task_id = Column(Integer, ForeignKey("task.id"), index=True)
-    user_id = Column(Integer, ForeignKey("user.id"), index=True)
-
-class Notification(Base):
-    __tablename__="notification"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    message = Column(Text, nullable=False)
-    is_read = Column(Boolean, nullable=False, default=False)
-    created_at = Column(DateTime, nullable=False, default=func.now())
     user_id = Column(Integer, ForeignKey("user.id"), index=True)

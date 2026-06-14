@@ -29,6 +29,29 @@ class FakeRepository:
         self.users = []
         self.tasks = []
 
+    def get_tasks_by_user(self, user_id=None):
+        result = {}
+        for task in self.tasks:
+            if user_id and task.creator_id != user_id:
+                continue
+            result[task.creator_id] = result.get(task.creator_id, 0) + 1
+        return [{"user_id": uid, "total_tasks": count} for uid, count in result.items()]
+
+    def update_task(self, task_id: int, task_update):
+        for task in self.tasks:
+            if task.id == task_id:
+                if task_update.name:
+                    task.name = task_update.name
+                return task
+        return None
+
+    def delete_task(self, task_id: int):
+        for task in self.tasks:
+            if task.id == task_id:
+                self.tasks.remove(task)
+                return task
+        return None
+
     def get_email(self, email):
         for user in self.users:
             if user.email == email:
@@ -75,6 +98,13 @@ class FakeRepository:
 
     def get_assigned_tasks(self, user_id: int):
         return [task for task in self.tasks if task.creator_id == user_id]
+    
+    def get_tasks_by_status(self):
+        result = {}
+        for task in self.tasks:
+            status = task.status if hasattr(task, 'status') else 'pending'
+            result[status] = result.get(status, 0) + 1
+        return result
         
     
 def make_user_register(email="test@test.com"):
@@ -284,3 +314,36 @@ def test_get_assigned_tasks_success():
 
     result = service.get_assigned_tasks(1)
     assert len(result) >= 0
+
+def test_get_tasks_by_status_success():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    current_user = make_fake_user(RoleEnum.ADMIN)
+    current_user.id = 1
+    service.create_task(make_task_creater(), current_user)
+
+    result = service.get_tasks_by_status()
+    assert isinstance(result, dict)
+
+def test_get_tasks_by_user_success():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    current_user = make_fake_user(RoleEnum.ADMIN)
+    current_user.id = 1
+    service.create_task(make_task_creater(), current_user)
+
+    result = service.get_tasks_by_user()
+    assert isinstance(result, list)
+
+def test_get_tasks_by_user_with_id_success():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    current_user = make_fake_user(RoleEnum.ADMIN)
+    current_user.id = 1
+    service.create_task(make_task_creater(), current_user)
+
+    result = service.get_tasks_by_user(1)
+    assert isinstance(result, list)

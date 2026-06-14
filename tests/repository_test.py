@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from models.models import Base, User
 from repository.repository import Repository
 from schemas.user import UserRegister, UserUpdate
+from schemas.task import TaskCreater, TaskUpdate
 from datetime import date
 
 engine = create_engine("sqlite:///:memory:")
@@ -23,6 +24,12 @@ def make_user_register(email="test@test.com"):
         email=email,
         birth_date=date(2000, 1, 1),
         password="123456"
+    )
+
+def make_task_creater():
+    return TaskCreater(
+        name="Test Task",
+        description="Test Description"
     )
 
 def test_register_user(db):
@@ -45,13 +52,11 @@ def test_get_user_by_id_sucess(db):
     repo = Repository(db)
     repo.register_user(make_user_register())
     result = repo.get_user_by_id(1)
-
     assert result is not None
 
 def test_get_user_by_id_not_exist(db):
     repo = Repository(db)
     result = repo.get_user_by_id(999)
-    
     assert result is None
 
 def test_update_user(db):
@@ -85,3 +90,57 @@ def test_delete_user_not_found(db):
     repo = Repository(db)
     result = repo.delete_user(999)
     assert result is None
+
+def test_create_task(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    result = repo.create_task(make_task_creater(), 1)
+    assert result.name == "Test Task"
+
+def test_get_task_by_id(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    repo.create_task(make_task_creater(), 1)
+    result = repo.get_task_by_id(1)
+    assert result is not None
+
+def test_get_task_by_id_not_found(db):
+    repo = Repository(db)
+    result = repo.get_task_by_id(999)
+    assert result is None
+
+def test_update_task(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    repo.create_task(make_task_creater(), 1)
+    task_update = TaskUpdate(name="Updated Task")
+    result = repo.update_task(1, task_update)
+    assert result.name == "Updated Task"
+
+def test_delete_task(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    repo.create_task(make_task_creater(), 1)
+    result = repo.delete_task(1)
+    assert result is not None
+
+def test_get_tasks_by_status(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    repo.create_task(make_task_creater(), 1)
+    result = repo.get_tasks_by_status()
+    assert isinstance(result, dict)
+
+def test_get_tasks_by_user(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    repo.create_task(make_task_creater(), 1)
+    result = repo.get_tasks_by_user()
+    assert isinstance(result, list)
+
+def test_get_tasks_by_user_with_id(db):
+    repo = Repository(db)
+    repo.register_user(make_user_register())
+    repo.create_task(make_task_creater(), 1)
+    result = repo.get_tasks_by_user(1)
+    assert isinstance(result, list)

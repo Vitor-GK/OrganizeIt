@@ -113,3 +113,9 @@ class Service:
         
         token = create_access_token({"sub": str(user.id)})
         return {"access_token": token, "token_type": "bearer"}
+
+    def get_tasks_by_status(self):
+        return self.repo.get_tasks_by_status()
+
+    def get_tasks_by_user(self, user_id: int | None = None):
+        return self.repo.get_tasks_by_user(user_id)

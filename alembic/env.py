@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from urllib.parse import quote_plus
 import os
 from app.core.db import Base
-from app.models.models import User, Task, TaskAssigment, Notification
+from app.models.models import User, Task, TaskAssigment
 
 load_dotenv()
 

@@ -5,6 +5,8 @@ from schemas.user import UserRegister
 from enums import RoleEnum, TaskEnum
 from schemas.user import UserUpdate
 from schemas.task import TaskCreater, TaskUpdate
+from sqlalchemy import func
+
 
 class Repository:
     def __init__(self, db: Session):
@@ -88,3 +90,20 @@ class Repository:
         self.db.delete(task)
         self.db.commit()
         return task
+    
+    def get_tasks_by_status(self):
+        results = self.db.query(Task.status, func.count(Task.id))\
+            .group_by(Task.status)\
+            .all()
+        return {status.value: count for status, count in results}
+
+    def get_tasks_by_user(self, user_id: int | None = None):
+        query = self.db.query(User.id, User.full_name, func.count(Task.id).label("total_tasks"))\
+            .join(Task, Task.creator_id == User.id)\
+            .group_by(User.id, User.full_name)
+        
+        if user_id:
+            query = query.filter(User.id == user_id)
+        
+        results = query.all()
+        return [{"user_id": user_id, "full_name": full_name, "total_tasks": total} for user_id, full_name, total in results]
