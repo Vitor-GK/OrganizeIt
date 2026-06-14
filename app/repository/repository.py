@@ -107,3 +107,10 @@ class Repository:
         
         results = query.all()
         return [{"user_id": user_id, "full_name": full_name, "total_tasks": total} for user_id, full_name, total in results]
+    
+    def logout(self, user_id: int, token: str):
+        user = self.get_user_by_id(user_id)
+        user.banned_token = token
+        self.db.commit()
+        self.db.refresh(user)
+        return {"message": "Logged out successfully"}

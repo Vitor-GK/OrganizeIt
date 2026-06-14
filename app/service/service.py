@@ -119,3 +119,6 @@ class Service:
 
     def get_tasks_by_user(self, user_id: int | None = None):
         return self.repo.get_tasks_by_user(user_id)
+    
+    def logout(self, current_user: User, token: str):
+        return self.repo.logout(current_user.id, token)

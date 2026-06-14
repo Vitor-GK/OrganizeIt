@@ -7,11 +7,6 @@ from core.db import SessionLocal
 from core.security import decode_access_token
 from repository.repository import Repository
 
-
-
-from app.core.security import decode_access_token
-from app.models.models import Member
-
 def get_db():
     db = SessionLocal()
     try:
@@ -35,5 +30,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     user = repo.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.banned_token == token:
+        raise HTTPException(status_code=401, detail="Token has been invalidated, please login again")
     
     return user
