@@ -1,8 +1,7 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Date, DateTime, Enum, Numeric, Boolean, Text
 from sqlalchemy.sql import func
-from app.enums import TaskEnum, PriorityEnum, RoleEnum
-
-from app.core.db import Base
+from enums import TaskEnum, PriorityEnum, RoleEnum
+from core.db import Base
 
 class User(Base):
     __tablename__="user"
