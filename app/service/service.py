@@ -13,11 +13,11 @@ class Service:
     def __init__(self, repo: Repository):
         self.repo = repo
 
-    def register_user(self, user_register: UserRegister):
+    def register_user(self, user_register: UserRegister, role: RoleEnum):
         user = self.repo.get_email(user_register.email)
         if user:
             raise HTTPException(status_code=409, detail="Email already registered")
-        return self.repo.register_user(user_register)
+        return self.repo.register_user(user_register, role)
     
     def get_user_by_id(self, user_id: int, current_user: User):
         if current_user.role !=  RoleEnum.ADMIN:
@@ -124,7 +124,7 @@ class Service:
     def get_tasks_by_status(self):
         return self.repo.get_tasks_by_status()
 
-    def get_tasks_by_user(self, user_id: int | None = None):
+    def get_tasks_by_user(self, user_id: int):
         return self.repo.get_tasks_by_user(user_id)
     
     def logout(self, current_user: User, token: str):

@@ -23,25 +23,25 @@ async def get_assigned_tasks(assignedTo: int, db: Session = Depends(get_db), cur
     return service.get_assigned_tasks(assignedTo)
 
 @task_router.get("/{id}", response_model=TaskResponse)
-async def get_task_by_id(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_task_by_id(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     repo = Repository(db)
     service = Service(repo)
-    return service.get_task_by_id(task_id)
+    return service.get_task_by_id(id)
 
 @task_router.put("/{id}")
-async def update_task(task_id: int, task_update: TaskUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def update_task(id: int, task_update: TaskUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     repo = Repository(db)
     service = Service(repo)
-    return service.update_task(task_id, task_update, current_user)
+    return service.update_task(id, task_update, current_user)
 
 @task_router.delete("/{id}")
-async def delete_task(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def delete_task(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     repo = Repository(db)
     service = Service(repo)
-    return service.delete_task(task_id, current_user)
+    return service.delete_task(id, current_user)
 
 @task_router.post("/{id}/assignments")
-async def assign_task(task_id: int, user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def assign_task(id: int, user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     repo = Repository(db)
     service = Service(repo)
-    return service.assign_task(task_id, user_id, current_user)
+    return service.assign_task(id, user_id, current_user)

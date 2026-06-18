@@ -6,6 +6,7 @@ from enums import RoleEnum, TaskEnum
 from schemas.user import UserUpdate
 from schemas.task import TaskCreater, TaskUpdate
 from sqlalchemy import func
+from core.security import hash_password
 
 
 class Repository:
@@ -18,12 +19,12 @@ class Repository:
     def get_user_by_id(self, user_id: int):
         return self.db.query(User).filter(User.id == user_id).first()
 
-    def register_user(self, user_register: UserRegister):
+    def register_user(self, user_register: UserRegister, role: RoleEnum):
         new_user = User(full_name=user_register.full_name,
                         email=user_register.email,
                         birth_date=user_register.birth_date,
-                        password=user_register.password,
-                        role=RoleEnum.GUEST
+                        password=hash_password(user_register.password), 
+                        role=role
         )
         self.db.add(new_user)
         self.db.commit()
@@ -97,12 +98,12 @@ class Repository:
             .all()
         return {status.value: count for status, count in results}
 
-    def get_tasks_by_user(self, user_id: int | None = None):
+    def get_tasks_by_user(self, user_id: int):
         query = self.db.query(User.id, User.full_name, func.count(Task.id).label("total_tasks"))\
             .join(Task, Task.creator_id == User.id)\
             .group_by(User.id, User.full_name)
         
-        if user_id:
+        if user_id is not None:
             query = query.filter(User.id == user_id)
         
         results = query.all()

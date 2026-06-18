@@ -5,7 +5,7 @@ API_URL = "http://localhost:8000"
 
 st.set_page_config(page_title="OrganizeIt", layout="wide")
 
-# ── Session state ──────────────────────────────────────────────────────────────
+
 if "token" not in st.session_state:
     st.session_state.token = None
 if "user_id" not in st.session_state:
@@ -14,14 +14,19 @@ if "user_id" not in st.session_state:
 def auth_headers():
     return {"Authorization": f"Bearer {st.session_state.token}"}
 
-# ── Helpers ────────────────────────────────────────────────────────────────────
-def show_response(response):
-    if response.status_code in (200, 201, 204):
-        st.success(f"✅ {response.status_code} — {response.json() if response.content else 'OK'}")
-    else:
-        st.error(f"❌ {response.status_code} — {response.json()}")
 
-# ── Sidebar: Auth ──────────────────────────────────────────────────────────────
+def show_response(response):
+    try:
+        data = response.json()
+    except ValueError:
+        data = response.text.strip() or "No content"
+
+    if response.status_code in (200, 201, 204):
+        st.success(f"✅ {response.status_code} — {data}")
+    else:
+        st.error(f"❌ {response.status_code} — {data}")
+
+
 st.sidebar.title("OrganizeIt")
 
 if st.session_state.token:
@@ -52,12 +57,9 @@ else:
         else:
             st.sidebar.error(f"❌ {response.json()}")
 
-# ── Main tabs ──────────────────────────────────────────────────────────────────
 tab_users, tab_tasks, tab_metrics = st.tabs(["Users", "Tasks", "Metrics"])
 
-# ══════════════════════════════════════════════════════════════════════════════
-# USERS
-# ══════════════════════════════════════════════════════════════════════════════
+
 with tab_users:
     st.header("Users")
 
@@ -67,9 +69,11 @@ with tab_users:
         email = st.text_input("Email", key="reg_email")
         password = st.text_input("Password", type="password", key="reg_pass")
         birth_date = st.date_input("Birth Date", key="reg_birth")
+        role = st.selectbox("Role", ["guest", "user", "admin"], key="reg_role")
         if st.button("Register", key="btn_register"):
             response = requests.post(
                 f"{API_URL}/users/",
+                params={"role": role},
                 json={
                     "full_name": full_name,
                     "email": email,
@@ -133,7 +137,7 @@ with tab_tasks:
         task_due = st.date_input("Due Date (optional)", key="task_due")
         if st.button("Create Task", key="btn_create_task"):
             body = {"name": task_name, "description": task_desc}
-            if task_priority: body["priority"] = task_priority.upper()
+            if task_priority: body["priority"] = task_priority
             if task_due: body["due_date"] = str(task_due)
             response = requests.post(
                 f"{API_URL}/tasks/",
@@ -173,7 +177,7 @@ with tab_tasks:
             body = {}
             if upd_task_name: body["name"] = upd_task_name
             if upd_task_desc: body["description"] = upd_task_desc
-            if upd_task_status: body["status"] = upd_task_status.upper()
+            if upd_task_status: body["status"] = upd_task_status
             response = requests.put(
                 f"{API_URL}/tasks/{int(upd_task_id)}",
                 json=body,
@@ -226,16 +230,15 @@ with tab_metrics:
 
     with col2:
         st.subheader("Tasks by User")
-        filter_uid = st.number_input("Filter by User ID (optional)", min_value=0, step=1, key="metric_uid")
+
+        filter_uid = st.number_input("User ID", min_value=1, step=1, key="metric_uid")
+
         if st.button("Load", key="btn_user_metric"):
-            params = {}
-            if filter_uid > 0:
-                params["user_id"] = int(filter_uid)
             response = requests.get(
-                f"{API_URL}/metrics/tasks-by-user",
-                params=params,
+                f"{API_URL}/metrics/tasks-by-user/{int(filter_uid)}",
                 headers=auth_headers()
             )
+
             if response.status_code == 200:
                 data = response.json()
                 st.table(data)
