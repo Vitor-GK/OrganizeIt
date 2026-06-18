@@ -1,12 +1,14 @@
 import pytest
 from service.service import Service
 from schemas.user import UserRegister, UserUpdate
-from schemas.task import TaskCreater
+from schemas.task import TaskCreater, TaskUpdate
+from schemas.auth import LoginRequest
 from datetime import date
 from fastapi import HTTPException
 from models.models import User
 from enums import TaskEnum, PriorityEnum, RoleEnum
 from unittest.mock import patch
+from core.security import hash_password
 
 class FakeUser:
     def __init__(self, id, full_name, email, is_active=1, role=None):
@@ -415,3 +417,107 @@ def test_assign_task_success():
     with patch("service.service.send_task_notification"):
         result = service.assign_task(1, 1, current_user)
     assert result is not None
+
+def test_update_task_not_found():
+    repo = FakeRepository()
+    service = Service(repo)
+    current_user = make_fake_user(RoleEnum.ADMIN)
+    task_update = TaskUpdate(name="Updated Task")
+
+    with pytest.raises(HTTPException) as exc:
+        service.update_task(999, task_update, current_user)
+    assert exc.value.status_code == 404
+
+def test_update_task_access_denied():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    admin_user = make_fake_user(RoleEnum.ADMIN)
+    admin_user.id = 1
+    service.create_task(make_task_creater(), admin_user)
+
+    current_user = make_fake_user(RoleEnum.GUEST)
+    task_update = TaskUpdate(name="Updated Task")
+
+    with pytest.raises(HTTPException) as exc:
+        service.update_task(1, task_update, current_user)
+    assert exc.value.status_code == 403
+
+def test_update_task_success():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    current_user = make_fake_user(RoleEnum.ADMIN)
+    current_user.id = 1
+    service.create_task(make_task_creater(), current_user)
+    task_update = TaskUpdate(name="Updated Task", description="New Description")
+
+    with patch("service.service.send_task_notification") as mock_notify:
+        result = service.update_task(1, task_update, current_user)
+    assert result.name == "Updated Task"
+    mock_notify.assert_called()
+
+def test_delete_task_not_found():
+    repo = FakeRepository()
+    service = Service(repo)
+    current_user = make_fake_user(RoleEnum.ADMIN)
+
+    with pytest.raises(HTTPException) as exc:
+        service.delete_task(999, current_user)
+    assert exc.value.status_code == 404
+
+def test_delete_task_access_denied():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    admin_user = make_fake_user(RoleEnum.ADMIN)
+    admin_user.id = 1
+    service.create_task(make_task_creater(), admin_user)
+
+    current_user = make_fake_user(RoleEnum.GUEST)
+
+    with pytest.raises(HTTPException) as exc:
+        service.delete_task(1, current_user)
+    assert exc.value.status_code == 403
+
+def test_delete_task_success():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    current_user = make_fake_user(RoleEnum.ADMIN)
+    current_user.id = 1
+    service.create_task(make_task_creater(), current_user)
+
+    result = service.delete_task(1, current_user)
+    assert result is not None
+
+def test_login_user_not_found():
+    repo = FakeRepository()
+    service = Service(repo)
+    login_request = LoginRequest(email="test@test.com", password="123456")
+
+    with pytest.raises(HTTPException) as exc:
+        service.login(login_request)
+    assert exc.value.status_code == 404
+
+def test_login_invalid_password():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    repo.users[0].password = hash_password("123456")
+    login_request = LoginRequest(email="test@test.com", password="wrong_password")
+
+    with pytest.raises(HTTPException) as exc:
+        service.login(login_request)
+    assert exc.value.status_code == 401
+
+def test_login_success():
+    repo = FakeRepository()
+    service = Service(repo)
+    service.register_user(make_user_register())
+    repo.users[0].password = hash_password("123456")
+    login_request = LoginRequest(email="test@test.com", password="123456")
+
+    result = service.login(login_request)
+    assert result["token_type"] == "bearer"
+    assert "access_token" in result
