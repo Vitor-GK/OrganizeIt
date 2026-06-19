@@ -47,7 +47,7 @@ ui.py                      # Streamlit interface
 ```
 
 ## Database Schema
-![Database Schema](docs/OrganizeIt_DB_Diagram.png.png)
+![Database Schema](docs/OrganizeIt_DB_Diagram.png)
 
 ---
 
