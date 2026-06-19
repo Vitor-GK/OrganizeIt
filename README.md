@@ -51,6 +51,11 @@ ui.py                      # Streamlit interface
 
 ---
 
+## UI
+![UI screen](docs/UI_OrganizeIt.png)
+
+---
+
 ## Architecture
 
 The project follows **Clean Architecture** in layers:
