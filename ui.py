@@ -63,7 +63,6 @@ tab_users, tab_tasks, tab_metrics = st.tabs(["Users", "Tasks", "Metrics"])
 with tab_users:
     st.header("Users")
 
-    # Register
     with st.expander("➕ Register User"):
         full_name = st.text_input("Full Name", key="reg_name")
         email = st.text_input("Email", key="reg_email")
@@ -83,7 +82,6 @@ with tab_users:
             )
             show_response(response)
 
-    # Get by ID
     with st.expander("🔍 Get User by ID"):
         get_user_id = st.number_input("User ID", min_value=1, step=1, key="get_user_id")
         if st.button("Get User", key="btn_get_user"):
@@ -93,7 +91,6 @@ with tab_users:
             )
             show_response(response)
 
-    # Update
     with st.expander("✏️ Update User"):
         upd_user_id = st.number_input("User ID", min_value=1, step=1, key="upd_user_id")
         upd_full_name = st.text_input("New Full Name (optional)", key="upd_name")
@@ -113,7 +110,6 @@ with tab_users:
             )
             show_response(response)
 
-    # Delete
     with st.expander("🗑️ Delete User (soft delete)"):
         del_user_id = st.number_input("User ID", min_value=1, step=1, key="del_user_id")
         if st.button("Delete User", key="btn_delete_user"):
@@ -123,13 +119,9 @@ with tab_users:
             )
             show_response(response)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# TASKS
-# ══════════════════════════════════════════════════════════════════════════════
 with tab_tasks:
     st.header("Tasks")
 
-    # Create
     with st.expander("➕ Create Task"):
         task_name = st.text_input("Name", key="task_name")
         task_desc = st.text_area("Description", key="task_desc")
@@ -146,7 +138,6 @@ with tab_tasks:
             )
             show_response(response)
 
-    # Get by ID
     with st.expander("🔍 Get Task by ID"):
         get_task_id = st.number_input("Task ID", min_value=1, step=1, key="get_task_id")
         if st.button("Get Task", key="btn_get_task"):
@@ -156,7 +147,6 @@ with tab_tasks:
             )
             show_response(response)
 
-    # Get assigned tasks
     with st.expander("📋 Get Assigned Tasks"):
         assigned_user_id = st.number_input("User ID", min_value=1, step=1, key="assigned_uid")
         if st.button("Get Tasks", key="btn_assigned"):
@@ -167,7 +157,6 @@ with tab_tasks:
             )
             show_response(response)
 
-    # Update
     with st.expander("✏️ Update Task"):
         upd_task_id = st.number_input("Task ID", min_value=1, step=1, key="upd_task_id")
         upd_task_name = st.text_input("New Name (optional)", key="upd_task_name")
@@ -185,7 +174,6 @@ with tab_tasks:
             )
             show_response(response)
 
-    # Delete
     with st.expander("🗑️ Delete Task"):
         del_task_id = st.number_input("Task ID", min_value=1, step=1, key="del_task_id")
         if st.button("Delete Task", key="btn_delete_task"):
@@ -195,7 +183,6 @@ with tab_tasks:
             )
             show_response(response)
 
-    # Assign task
     with st.expander("👤 Assign Task to User"):
         assign_task_id = st.number_input("Task ID", min_value=1, step=1, key="assign_task_id")
         assign_user_id = st.number_input("User ID", min_value=1, step=1, key="assign_user_id")
@@ -207,9 +194,6 @@ with tab_tasks:
             )
             show_response(response)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# METRICS
-# ══════════════════════════════════════════════════════════════════════════════
 with tab_metrics:
     st.header("Metrics")
 
